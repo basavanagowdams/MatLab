@@ -1,0 +1,51 @@
+% Load the image
+image = imread('Name.jpg');
+
+figure;
+imshow(image);
+
+image = rgb2gray(image);
+figure;
+imshow(image);
+
+original_image = image;
+
+% Perform adaptive histogram equalization
+enhanced_image = adapthisteq(image);
+
+figure;
+imshow(enhanced_image);
+
+% Apply DWT
+[LL, LH, HL, HH] = dwt2(image, 'db1'); % db1 is Daubechies wavelet with 1 vanishing moment
+
+figure;
+% Display the band images
+subplot(2, 2, 1);
+imshow(LL, []);
+title('Approximation (LL)');
+
+subplot(2, 2, 2);
+imshow(LH, []);
+title('Horizontal Detail (LH)');
+
+subplot(2, 2, 3);
+imshow(HL, []);
+title('Vertical Detail (HL)');
+
+subplot(2, 2, 4);
+imshow(HH, []);
+title('Diagonal Detail (HH)');
+
+% Apply DWT
+[LL_original, ~, ~, ~] = dwt2(original_image, 'db1');
+[LL_enhanced, ~, ~, ~] = dwt2(enhanced_image, 'db1');
+
+% Calculate MSE
+mse_value = immse(LL_original, LL_enhanced);
+fprintf('Mean Squared Error (MSE): %f\n', mse_value);
+
+% Calculate PSNR
+MAX = double(max(LL_original(:))); % Maximum possible pixel value
+psnr_value = 10 * log10((MAX^2) / mse_value);
+fprintf('Peak Signal-to-Noise Ratio (PSNR): %f dB\n',psnr_value);
